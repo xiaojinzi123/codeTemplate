@@ -1,4 +1,4 @@
-package com.xiaojinzi.demo.app.order_detail.view
+package com.xiaojinzi.demo.app.{NAME}.view
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
