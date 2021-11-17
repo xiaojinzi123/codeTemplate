@@ -1,0 +1,40 @@
+package com.xiaojinzi.demo.app.order_detail.view
+
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material.Scaffold
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
+import com.xiaojinzi.module.base.view.compose.AppbarNormal
+import com.xiaojinzi.support.ktx.nothing
+
+@Composable
+private fun {JAVA_NAME}View() {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .nothing(),
+    ) {
+        // TODO
+    }
+}
+
+@Composable
+fun {JAVA_NAME}ViewWrap() {
+    Scaffold(
+        topBar = {
+            AppbarNormal(
+                title = "Hello"
+            )
+        }
+    ) {
+        {JAVA_NAME}View()
+    }
+}
+
+@Preview
+@Composable
+private fun {JAVA_NAME}ViewPreview() {
+    {JAVA_NAME}View()
+}
