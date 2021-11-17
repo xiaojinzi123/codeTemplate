@@ -23,19 +23,27 @@ fun main(args: Array<String>) {
 
     val targetName = args[0]
     // 获取命令调用的目录
-    val targetFolderPath = InputStreamReader(Runtime.getRuntime().exec("pwd").inputStream).readText()
+    val targetFolderPath = InputStreamReader(Runtime.getRuntime().exec("pwd").inputStream).readText().trim()
+
+    println("targetFolderPath = $targetFolderPath")
 
     val folderFile = File(targetFolderPath)
-    if (!folderFile.exists()) {
-        throw IllegalArgumentException("folder is not exist")
+    if (!folderFile.exists() || !folderFile.isDirectory) {
+        throw IllegalArgumentException("folder '${folderFile.path}' is not exist")
     }
     // 寻找最后出现 java 或者 kotlin 的目录
-    var tempFile = folderFile
-    while (tempFile.name != "java" && tempFile.name != "kotlin") {
-        // println("name = ${tempFile.name}")
-        tempFile = tempFile.parentFile
-    }
-    val targetSubPath = folderFile.path.removeRange(startIndex = 0, tempFile.path.length + 1)
+    val targetCodeRootFolder = try {
+        var tempFile = folderFile
+        while (tempFile.name != "java" && tempFile.name != "kotlin") {
+            // println("name = ${tempFile.name}")
+            tempFile = tempFile.parentFile
+        }
+        tempFile
+    } catch (e: Exception) {
+        null
+    } ?: throw IllegalArgumentException("con't find java or kotlin folder")
+
+    val targetSubPath = folderFile.path.removeRange(startIndex = 0, targetCodeRootFolder.path.length + 1)
     // println("targetSubPath = $targetSubPath")
     val rootPackageName = targetSubPath.replace(oldChar = '/', newChar = '.')
     println("rootPackageName = $rootPackageName")
