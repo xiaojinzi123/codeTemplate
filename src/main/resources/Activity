@@ -9,12 +9,14 @@ import androidx.core.view.WindowCompat
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.xiaojinzi.component.anno.RouterAnno
 import com.xiaojinzi.module.base.RouterConfig
+import com.xiaojinzi.support.annotation.ViewLayer
 import com.xiaojinzi.support.ktx.initOnceUseViewModel
 import com.xiaojinzi.module.base.view.BaseActivity
 
 @RouterAnno(
     hostAndPath = RouterConfig.PLACEHOLDER
 )
+@ViewLayer
 class {JAVA_NAME}Act : BaseActivity<{JAVA_NAME}ViewModel>() {
 
     override fun getViewModelClass(): Class<{JAVA_NAME}ViewModel> {
