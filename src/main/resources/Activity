@@ -10,6 +10,8 @@ import com.google.accompanist.pager.ExperimentalPagerApi
 import com.xiaojinzi.component.anno.RouterAnno
 import com.xiaojinzi.module.base.RouterConfig
 import com.xiaojinzi.module.base.support.translateStatusBar
+import com.xiaojinzi.module.base.theme.tally.TallyTheme
+import com.xiaojinzi.module.base.view.compose.StateBar
 import com.xiaojinzi.support.annotation.ViewLayer
 import com.xiaojinzi.support.ktx.initOnceUseViewModel
 import com.xiaojinzi.module.base.view.BaseActivity
@@ -30,6 +32,7 @@ class {JAVA_NAME}Act : BaseActivity<{JAVA_NAME}ViewModel>() {
     @ExperimentalFoundationApi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         window.translateStatusBar()
         WindowCompat.setDecorFitsSystemWindows(window, false)
         initOnceUseViewModel {
@@ -37,7 +40,11 @@ class {JAVA_NAME}Act : BaseActivity<{JAVA_NAME}ViewModel>() {
         }
 
         setContent {
-            {JAVA_NAME}ViewWrap()
+            TallyTheme {
+                StateBar {
+                    {JAVA_NAME}ViewWrap()
+                }
+            }
         }
 
     }
