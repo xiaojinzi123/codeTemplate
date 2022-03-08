@@ -1,155 +1,57 @@
 import java.io.*
 
-val FILE_USECASE: InputStream
-    get() = Thread.currentThread().contextClassLoader.getResourceAsStream("UseCase")!!
-val FILE_VIEWMODEL: InputStream
-    get() = Thread.currentThread().contextClassLoader.getResourceAsStream("ViewModel")!!
-val FILE_ACTIVITY: InputStream
-    get() = Thread.currentThread().contextClassLoader.getResourceAsStream("Activity")!!
-val FILE_VIEWS: InputStream
-    get() = Thread.currentThread().contextClassLoader.getResourceAsStream("Views")!!
-val FILE_VOS: InputStream
-    get() = Thread.currentThread().contextClassLoader.getResourceAsStream("VOS")!!
+val PARAMETER_NAME_TEMPLATE = "template"
+val PARAMETER_NAME_NAME = "name"
 
 fun main(args: Array<String>) {
 
-    if (args.size != 1) {
+    val targetArgs = arrayOf("template=xxx", "ghhhh")
+
+    println("targetArgs = ${targetArgs.joinToString()}")
+
+    if (targetArgs[0].isEmpty()) {
         throw IllegalArgumentException("name is invalid")
     }
 
-    if (args[0].isEmpty()) {
-        throw IllegalArgumentException("name is invalid")
+    var template: String? = null
+    var name: String? = null
+
+    targetArgs
+        .filter { "=" in it }
+        .forEach {
+            val index = it.indexOf('=')
+            val parameterName = it.substring(startIndex = 0, endIndex = index)
+            val parameterValue = it.substring(startIndex = index + 1)
+            println("parameterName = $parameterName, parameterValue = $parameterValue")
+            when (parameterName) {
+                PARAMETER_NAME_TEMPLATE -> template = template ?: parameterValue
+                PARAMETER_NAME_NAME -> name = name ?: parameterValue
+            }
+        }
+
+    targetArgs
+        .filter { "=" !in it }
+        .forEachIndexed { index, item ->
+            println("index = $index, item = $item")
+            when (index) {
+                0 -> template = template ?: item
+                1 -> name = name ?: item
+            }
+        }
+
+    if (template.isNullOrEmpty() || name.isNullOrEmpty()) {
+        throw IllegalArgumentException()
     }
 
-    val targetName = args[0]
+    println("template = $template, name = $name")
+
     // 获取命令调用的目录
     val targetFolderPath = InputStreamReader(Runtime.getRuntime().exec("pwd").inputStream).readText().trim()
 
     println("targetFolderPath = $targetFolderPath")
 
-    val folderFile = File(targetFolderPath)
-    if (!folderFile.exists() || !folderFile.isDirectory) {
-        throw IllegalArgumentException("folder '${folderFile.path}' is not exist")
-    }
-    // 寻找最后出现 java 或者 kotlin 的目录
-    val targetCodeRootFolder = try {
-        var tempFile = folderFile
-        while (tempFile.name != "java" && tempFile.name != "kotlin") {
-            // println("name = ${tempFile.name}")
-            tempFile = tempFile.parentFile
-        }
-        tempFile
-    } catch (e: Exception) {
-        null
-    } ?: throw IllegalArgumentException("con't find java or kotlin folder")
-
-    val targetSubPath = folderFile.path.removeRange(startIndex = 0, targetCodeRootFolder.path.length + 1)
-    // println("targetSubPath = $targetSubPath")
-    val rootPackageName = targetSubPath.replace(oldChar = '/', newChar = '.')
-    println("rootPackageName = $rootPackageName")
-
-    createUseCase(
-        rootPackageName = rootPackageName,
-        name = targetName,
-        rootFolderFile = File(targetFolderPath)
-    )
-    createViewModel(
-        rootPackageName = rootPackageName,
-        name = targetName,
-        rootFolderFile = File(targetFolderPath)
-    )
-    createActivity(
-        rootPackageName = rootPackageName,
-        name = targetName,
-        rootFolderFile = File(targetFolderPath)
-    )
-    createViews(
-        rootPackageName = rootPackageName,
-        name = targetName,
-        rootFolderFile = File(targetFolderPath)
-    )
-    createVOS(
-        rootPackageName = rootPackageName,
-        name = targetName,
-        rootFolderFile = File(targetFolderPath)
-    )
-    println("工作完成了")
-
 }
 
-/**
- * @param name 名字必须是首字母大写的
- */
-fun createUseCase(rootPackageName: String, name: String, rootFolderFile: File) {
-    val targetName = toJavaName(name = name)
-    val targetFolder = File(rootFolderFile, File(name, "domain").path)
-    if (!targetFolder.exists()) {
-        targetFolder.mkdirs().run {
-            if (!this) {
-                throw IllegalArgumentException("create folder fail: ${targetFolder.path}")
-            }
-        }
-    }
-    val targetFile = File(targetFolder, "${targetName}UseCase.kt")
-    createFile(targetFile, FILE_USECASE, name, targetName, rootPackageName)
-}
-
-fun createViewModel(rootPackageName: String, name: String, rootFolderFile: File) {
-    val targetName = toJavaName(name = name)
-    val targetFolder = File(rootFolderFile, File(name, "view").path)
-    if (!targetFolder.exists()) {
-        targetFolder.mkdirs().run {
-            if (!this) {
-                throw IllegalArgumentException("create folder fail: ${targetFolder.path}")
-            }
-        }
-    }
-    val targetFile = File(targetFolder, "${targetName}ViewModel.kt")
-    createFile(targetFile, FILE_VIEWMODEL, name, targetName, rootPackageName)
-}
-
-fun createActivity(rootPackageName: String, name: String, rootFolderFile: File) {
-    val targetName = toJavaName(name = name)
-    val targetFolder = File(rootFolderFile, File(name, "view").path)
-    if (!targetFolder.exists()) {
-        targetFolder.mkdirs().run {
-            if (!this) {
-                throw IllegalArgumentException("create folder fail: ${targetFolder.path}")
-            }
-        }
-    }
-    val targetFile = File(targetFolder, "${targetName}Act.kt")
-    createFile(targetFile, FILE_ACTIVITY, name, targetName, rootPackageName)
-}
-
-fun createViews(rootPackageName: String, name: String, rootFolderFile: File) {
-    val targetName = toJavaName(name = name)
-    val targetFolder = File(rootFolderFile, File(name, "view").path)
-    if (!targetFolder.exists()) {
-        targetFolder.mkdirs().run {
-            if (!this) {
-                throw IllegalArgumentException("create folder fail: ${targetFolder.path}")
-            }
-        }
-    }
-    val targetFile = File(targetFolder, "${targetName}Views.kt")
-    createFile(targetFile, FILE_VIEWS, name, targetName, rootPackageName)
-}
-
-fun createVOS(rootPackageName: String, name: String, rootFolderFile: File) {
-    val targetName = toJavaName(name = name)
-    val targetFolder = File(rootFolderFile, File(name, "view").path)
-    if (!targetFolder.exists()) {
-        targetFolder.mkdirs().run {
-            if (!this) {
-                throw IllegalArgumentException("create folder fail: ${targetFolder.path}")
-            }
-        }
-    }
-    InputStreamReader(FILE_VOS)
-    val targetFile = File(targetFolder, "${targetName}VOS.kt")
-    createFile(targetFile, FILE_VOS, name, targetName, rootPackageName)
-}
 
 private fun createFile(
     targetFile: File,
