@@ -1,39 +1,57 @@
 import java.io.*
+import java.lang.management.ManagementFactory
+import java.nio.file.Paths
 import java.util.UUID
 
 fun main(args: Array<String>) {
 
-    /*if (args.size != 2) {
+    if (args.size != 2) {
         throw IllegalArgumentException("parameter count must be 2")
-    }*/
+    }
 
     // 获取命令被调用的目录
-    // val targetFolderPath = InputStreamReader(Runtime.getRuntime().exec("pwd").inputStream).readText().trim()
-    val targetFolderPath = "/Users/hhkj/Documents/code/java/github/mvvmAndroid/src/main/kotlin/module/test"
+    val targetFolderPath = InputStreamReader(Runtime.getRuntime().exec("pwd").inputStream).readText().trim()
     val targetFolder = File(targetFolderPath)
+    val tempKey = "mvvmAndroid/lib/mvvmAndroid"
+    val tempClassPath = ManagementFactory
+        .getRuntimeMXBean()
+        .classPath
+        .split(":")
+        .first { it.contains(other = tempKey) }
     // 获取命令的目录
-    val commandFolderPath = System.getProperty("user.dir")
-    val templateFolder = File(commandFolderPath, "template")
+    val commandFolderPath = tempClassPath.substring(
+        startIndex = 0,
+        endIndex = tempClassPath.indexOf(string = tempKey),
+    )
+    val commandFolder = File(commandFolderPath)
+    val templateFolder = File(commandFolder, "mvvmAndroid_template")
+    if (!templateFolder.exists()) {
+        templateFolder.mkdirs()
+    }
     val cacheFolder = File(commandFolderPath, "cache")
 
     // 获取模板的名称
-    val template = "test"
-    val name = "user_detail"
+    val template = args[0]
+    val name = args[1]
     val javaName = toJavaName(name = name)
 
     val targetCreateFolder = File(targetFolder, name)
     val targetTemplateFolder = File(templateFolder, template)
 
-    println("targetFolderPath = $targetFolderPath")
     println("targetFolder = ${targetFolder.path}")
-    println("user.dir = $commandFolderPath")
+    println("commandFolderPath = $commandFolderPath")
     println("templateFolderPath = ${templateFolder.path}")
     println("cacheFolder = ${cacheFolder.path}")
     println("template = $template")
     println("targetCreateFolder = $targetCreateFolder")
     println("targetTemplateFolder = $targetTemplateFolder")
+    println()
     println("name = $name")
     println("javaName = $javaName")
+
+    if (!targetTemplateFolder.exists()) {
+        throw RuntimeException("template '$template' is not exist!!!")
+    }
 
     if (targetCreateFolder.exists()) {
         throw RuntimeException("folder '${targetCreateFolder.path}' is exist!!!")
@@ -43,8 +61,6 @@ fun main(args: Array<String>) {
     if (!isCopySuccess) {
         throw RuntimeException("fail to copy template to folder '${targetCreateFolder.path}'")
     }
-
-    println("isCopySuccess = $isCopySuccess")
 
     var rootFile = File(targetFolderPath)
     while (rootFile.name != "java" && rootFile.name != "kotlin") {
@@ -85,8 +101,9 @@ private fun toJavaName(name: String): String {
 
 private fun replaceContent(file: File, name: String, javaName: String, rootPackageName: String) {
     if (file.isFile) {
+        val parentFile = file.parentFile
         val originalName = file.name
-        val outputFile = File(file.parentFile, "${originalName}_${UUID.randomUUID()}")
+        val outputFile = File(parentFile, "${originalName}_${UUID.randomUUID()}")
         file.inputStream().use {
             val fileOut = BufferedWriter(FileWriter(outputFile))
             InputStreamReader(file.inputStream()).use { fileIn ->
@@ -101,9 +118,17 @@ private fun replaceContent(file: File, name: String, javaName: String, rootPacka
             }
         }
         file.delete()
-        outputFile.renameTo(file)
+        outputFile.renameTo(
+            File(
+                parentFile,
+                originalName
+                    .replace(oldValue = "{NAME}", newValue = name)
+                    .replace(oldValue = "{JAVA_NAME}", newValue = javaName)
+                    .replace(oldValue = "{ROOT_PACKAGE_NAME}", newValue = rootPackageName)
+            )
+        )
     } else {
-        file.listFiles().forEach {
+        file.listFiles()?.forEach {
             replaceContent(
                 file = it, name = name, javaName = javaName, rootPackageName = rootPackageName,
             )
