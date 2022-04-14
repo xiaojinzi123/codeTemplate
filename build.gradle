@@ -4,7 +4,7 @@ plugins {
 }
 
 group = 'com.xiaojinzi'
-archivesBaseName = "mvvmAndroid"
+archivesBaseName = "codeTemplate"
 version = '1.0'
 
 repositories {

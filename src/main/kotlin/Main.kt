@@ -12,7 +12,7 @@ fun main(args: Array<String>) {
     // 获取命令被调用的目录
     val targetFolderPath = InputStreamReader(Runtime.getRuntime().exec("pwd").inputStream).readText().trim()
     val targetFolder = File(targetFolderPath)
-    val tempKey = "mvvmAndroid/lib/mvvmAndroid"
+    val tempKey = "codeTemplate/lib/codeTemplate"
     val tempClassPath = ManagementFactory
         .getRuntimeMXBean()
         .classPath
@@ -24,7 +24,7 @@ fun main(args: Array<String>) {
         endIndex = tempClassPath.indexOf(string = tempKey),
     )
     val commandFolder = File(commandFolderPath)
-    val templateFolder = File(commandFolder, "mvvmAndroid_template")
+    val templateFolder = File(commandFolder, "codeTemplates")
     if (!templateFolder.exists()) {
         templateFolder.mkdirs()
     }
