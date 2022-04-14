@@ -8,9 +8,9 @@
 ## 添加模板
 
 占位符：
-包路径：{ROOT_PACKAGE_NAME}
-输入的名称：{NAME}
-输入的名称 For Java: {JAVA_NAME}
+- 包路径：{ROOT_PACKAGE_NAME}
+- 输入的名称：{NAME}
+- 输入的名称 For Java: {JAVA_NAME}
 
 在 codeTemplate 同级目录创建 codeTemplates 目录. 内部的每一个目录都是一个模板. 比如这里添加了一个 emo 的模板：
 
