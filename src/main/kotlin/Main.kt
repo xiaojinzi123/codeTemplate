@@ -1,7 +1,9 @@
-import java.io.*
+import java.io.BufferedWriter
+import java.io.File
+import java.io.FileWriter
+import java.io.InputStreamReader
 import java.lang.management.ManagementFactory
-import java.nio.file.Paths
-import java.util.UUID
+import java.util.*
 
 fun main(args: Array<String>) {
 
@@ -9,26 +11,46 @@ fun main(args: Array<String>) {
         throw IllegalArgumentException("parameter count must be 2")
     }
 
-    // 获取命令被调用的目录
-    val targetFolderPath = InputStreamReader(Runtime.getRuntime().exec("pwd").inputStream).readText().trim()
+    // 是否是 Windows
+    val isWindows = System.getProperty("os.name").contains("Windows")
+    println("isWindows = $isWindows")
+
+    val pathSeparator = if(isWindows) {
+        "\\"
+    } else {
+        "/"
+    }
+
+    val targetFolderPath = if (isWindows) {
+        System.getProperty("user.dir")
+    } else {
+        InputStreamReader(Runtime.getRuntime().exec("pwd").inputStream).readText().trim()
+    }
+    println("targetFolderPath = $targetFolderPath")
+
     val targetFolder = File(targetFolderPath)
-    val tempKey = "codeTemplate/lib/codeTemplate"
-    val tempClassPath = ManagementFactory
+    val tempKey = "codeTemplate${pathSeparator}lib${pathSeparator}codeTemplate"
+
+    val classPath = ManagementFactory
         .getRuntimeMXBean()
         .classPath
-        .split(":")
+
+    val classPathArray = classPath
+        .split(if (isWindows) ";" else ":")
+    val tempClassPath = classPathArray
         .first { it.contains(other = tempKey) }
+
     // 获取命令的目录
     val commandFolderPath = tempClassPath.substring(
         startIndex = 0,
         endIndex = tempClassPath.indexOf(string = tempKey),
     )
+
     val commandFolder = File(commandFolderPath)
     val templateFolder = File(commandFolder, "codeTemplates")
     if (!templateFolder.exists()) {
         templateFolder.mkdirs()
     }
-    val cacheFolder = File(commandFolderPath, "cache")
 
     // 获取模板的名称
     val template = args[0]
@@ -41,7 +63,6 @@ fun main(args: Array<String>) {
     println("targetFolder = ${targetFolder.path}")
     println("commandFolderPath = $commandFolderPath")
     println("templateFolderPath = ${templateFolder.path}")
-    println("cacheFolder = ${cacheFolder.path}")
     println("template = $template")
     println("targetCreateFolder = $targetCreateFolder")
     println("targetTemplateFolder = $targetTemplateFolder")
@@ -70,7 +91,7 @@ fun main(args: Array<String>) {
 
     val rootPackageName = targetFolderPath
         .removeRange(startIndex = 0, rootFile.path.length + 1)
-        .replace(oldChar = '/', newChar = '.')
+        .replace(oldValue = pathSeparator, newValue = ".")
 
     println("rootFile = $rootFile")
     println("rootPackageName = $rootPackageName")
